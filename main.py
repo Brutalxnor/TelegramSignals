@@ -33,14 +33,14 @@ TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 # Define source and target groups
 source_groups = [
-    '2176378686',  # Source Group 1 ID
-    '@tessbta3y1',   # Source Group 2 ID
-    '2195133544', #tessprivate2
-    '2202517103' #tess2
+    '2176378686',   #  Elite 
+    'tessbta3y1',   #  99%
+    '@forex_factory_signals1',   # Elite Free
+    '@fxgolden_trades1'    # 99% free
 ]
 target_groups = [
-    '2193517351',  # Target Group 1 ID
-    '2167695020',   # Target Group 2 ID
+    '-1002193517351',  # signal vip for Elite
+    '-1002167695020',   # GolD Pioneer for 99%
     '@GoldGuruSignalFREE',
     '@TakeProfitSignalFREE'
 ]
