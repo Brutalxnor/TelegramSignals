@@ -1,21 +1,15 @@
-
-
-
-
-
-
+import os
 import configparser
 import json
 import asyncio
 from datetime import datetime, timedelta, timezone
-import os
 import requests
 import time
 from telethon import TelegramClient, events
 from telethon.errors import SessionPasswordNeededError
 from telethon.tl import types
 from telethon.tl.functions.messages import GetHistoryRequest
-from telethon.tl.types import PeerChannel, InputPeerChannel
+from telethon.tl.types import PeerChannel
 
 # Some functions to parse JSON date
 class DateTimeEncoder(json.JSONEncoder):
@@ -26,31 +20,27 @@ class DateTimeEncoder(json.JSONEncoder):
             return list(o)
         return json.JSONEncoder.default(self, o)
 
-# Reading Configs
-config = configparser.ConfigParser()
-config.read("telethon.config")
-
-# Setting configuration values
-api_id = config["telethon_credentials"]["api_id"]
-api_hash = config["telethon_credentials"]["api_hash"]
-phone = config["telethon_credentials"]["phone_number"]
-username = config["telethon_credentials"]["username"]
+# Reading Configs from environment variables
+api_id = os.getenv("TELETHON_API_ID")
+api_hash = os.getenv("TELETHON_API_HASH")
+phone = os.getenv("TELETHON_PHONE_NUMBER")
+username = os.getenv("TELETHON_USERNAME")
 
 api_hash = str(api_hash)
 
 # Telegram Bot credentials
-TOKEN = '7463987435:AAF7xskJNHpPs1jvBGAysk3p6CJkmQWqfHU'  # Replace with your bot token
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 # Define source and target groups
 source_groups = [
-    '2176378686',   #  Elite 
-    'tessbta3y1',   #  99%
-    '@forex_factory_signals1',   # Elite Free
-    '@fxgolden_trades1'    # 99% free
+    '2176378686',  # Source Group 1 ID
+    '@tessbta3y1',   # Source Group 2 ID
+    '2195133544', #tessprivate2
+    '2202517103' #tess2
 ]
 target_groups = [
-    '-1002193517351',  # signal vip for Elite
-    '-1002167695020',   # GolD Pioneer for 99%
+    '2193517351',  # Target Group 1 ID
+    '2167695020',   # Target Group 2 ID
     '@GoldGuruSignalFREE',
     '@TakeProfitSignalFREE'
 ]
@@ -95,7 +85,7 @@ def send_sticker(token, chat_id, sticker_file_id):
 client = TelegramClient(username, api_id, api_hash)
 
 async def fetch_and_post_messages(phone, source_group, target_group):
-    await client.start()
+    await client.start(phone=lambda: phone)
     print(f"Client Created for source: {source_group} and target: {target_group}")
     # Ensure you're authorized
     if not await client.is_user_authorized():
@@ -113,22 +103,10 @@ async def fetch_and_post_messages(phone, source_group, target_group):
         else:
             source_entity = await client.get_entity(source_group)
     except Exception as e:
-        print(f"Error fetching source entity: {e}")
-        return
-
-    try:
-        if target_group.startswith('-100'):
-            target_entity = PeerChannel(int(target_group))
-        elif "t.me/" in target_group:
-            target_entity = await client.get_entity(target_group.split('/')[-1])
-        else:
-            target_entity = await client.get_entity(target_group)
-    except Exception as e:
-        print(f"Error fetching target entity: {e}")
+        print(f"Error fetching entity: {e}")
         return
 
     my_channel = await client.get_entity(source_entity)
-    target_channel = await client.get_entity(target_entity)
 
     one_hour_ago = (datetime.now() - timedelta(hours=1)).replace(tzinfo=timezone.utc)
 
